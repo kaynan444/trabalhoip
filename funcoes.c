@@ -1,14 +1,13 @@
 #include "funcoes.h"
-//função para alocar memória para a turma
 void InicializarTurma(turma *t) {
   t->alunos = (aluno*) malloc(MAX * sizeof(aluno));
     if(t->alunos == NULL) {
-      printf("Erro ao alocar memória\n");
+      printf("Erro ao alocar memória\n"); 
       exit(EXIT_FAILURE);
     }
   t->qtdAlunos = 0;
   t->id = 0;
-} //verifica se a matricula cadastrada já existe
+} //verifica se a matricula cadastrada existe
 int matricula_valida(turma *t, int matricula) {
   for(int i = 0; i < t->qtdAlunos; i++) {
     if(t->alunos[i].matricula == matricula) {
@@ -16,12 +15,13 @@ int matricula_valida(turma *t, int matricula) {
     }
   }
   return 0;
-} //função que recebe os dados do aluno e os armazena na estruct
+} //função que recebe os dados do aluno e os armazena na struct
 void CadastrarAluno(turma *t) {
   int matricula;
   printf("\nDigite a matrícula do aluno: \n");
   scanf("%d", &t->alunos[t->qtdAlunos].matricula);
   matricula = t->alunos[t->qtdAlunos].matricula;
+  //verifica se a matrícula está dentro da estutura
   if(t->alunos[t->qtdAlunos].matricula <2023001 || t->alunos[t->qtdAlunos].matricula > 2023999) {
     printf("Erro no formato da matricula, informe uma matricula entre 2023001 e 2023999.\n");
     return;
@@ -40,11 +40,11 @@ void CadastrarAluno(turma *t) {
   for (int i = 0; i < 7; i++) {
      scanf("%d", &t->alunos[t->qtdAlunos].faltas[i]); 
   }
-  printf("Informe o codigo da turma do aluno: \n");
+  printf("\nInforme o codigo da turma do aluno: \n");
   scanf("%d", &t->alunos[t->qtdAlunos].codTurma);
 
   t->qtdAlunos++;
-  printf("Aluno cadastrado om sucesso");
+  printf("Aluno cadastrado com sucesso");
 
   if(t->qtdAlunos == MAX) {
     t->alunos = (aluno*) realloc(t->alunos, (MAX + 10) * sizeof(aluno));
@@ -61,21 +61,21 @@ void CadastrarAluno(turma *t) {
      exit(EXIT_FAILURE);
    }
     fprintf(arquivo, "Aluno cadastrado\n");
-    fprintf(arquivo, "Nome: %s\n", t->alunos[t->qtdAlunos].nome);
-    fprintf(arquivo, "Matricula: %d\n", t->alunos[t->qtdAlunos].matricula);
+    fprintf(arquivo, "Nome: %s\n", t->alunos[t->qtdAlunos - 1].nome);
+    fprintf(arquivo, "Matricula: %d\n", t->alunos[t->qtdAlunos - 1].matricula);
     fprintf(arquivo, "Notas: ");
     for(int j = 0; j < 7; j++) {
-      fprintf(arquivo, "%.2f ", t->alunos[t->qtdAlunos].notas[j]);
+      fprintf(arquivo, "%.2f ", t->alunos[t->qtdAlunos - 1].notas[j]);
     }
     fprintf(arquivo, "\nFaltas: ");
-    printf("Notas: ");
+    fprintf(arquivo, "Notas: ");
     for(int k = 0; k < 7; k++) {
-      printf("%d ", t->alunos[t->qtdAlunos].faltas[k]);
+      fprintf(arquivo, "%d ", t->alunos[t->qtdAlunos - 1].faltas[k]);
     }
-    fprintf(arquivo, "Codigo da turma: %d\n", t->alunos[t->qtdAlunos].codTurma);
+    fprintf(arquivo, "\nCodigo da turma: %d\n", t->alunos[t->qtdAlunos - 1].codTurma);
     fprintf(arquivo, "\n\n");
     fclose(arquivo);
-} //função para remover o aluno
+}
 void RemoverAluno(turma *t) {
   int matricula;
   int encontrar = 0;
@@ -89,7 +89,7 @@ void RemoverAluno(turma *t) {
   for(int i = 0; i < t->qtdAlunos; i++) {
     if(t->alunos[i].matricula == matricula) {
       encontrar = 1;
-      for(int j = i; j < t->qtdAlunos - 1; i++) {
+      for(int j = i; j < t->qtdAlunos - 1; j++) {
         t->alunos[j] = t->alunos[j + 1];
       }
       (t->qtdAlunos)--;
@@ -106,18 +106,16 @@ void RemoverAluno(turma *t) {
      printf( "Erro ao abrir arquivo\n");
      exit(EXIT_FAILURE);
    }
-  if(t->qtdAlunos == 0) {
-    fprintf(arquivo, "Nenhum aluno cadastrado\n");
-  }
   if(!encontrar) {
-    fprintf(arquivo, "Aluno não encontrado\n");
+    fprintf(arquivo, "\nAluno não encontrado\n");
   }
-  fprintf(arquivo, "%s removido\n", t->alunos[t->qtdAlunos].nome);
+  fprintf(arquivo, "Aluno removido\n");
   fclose(arquivo);
-} //lista todos os alunos
+
+} //lista os alunos cadastrados
 void ListarTodos(turma *t) {
   if(t->qtdAlunos == 0) {
-    printf("Nenhum aluno cadastrado\n");
+    printf("Nenhum aluno cadastrado.\n");
     return;
   }
   printf( "Alunos cadastrados: \n");
@@ -135,15 +133,16 @@ void ListarTodos(turma *t) {
     printf("\nCodigo da turma: %d\n", t->alunos[i].codTurma);
     printf("\n");
   }
+  
   FILE *arquivo;
     arquivo = fopen("relatorio.txt", "a");
    if(arquivo == NULL) {
      printf( "Erro ao abrir arquivo\n");
      exit(EXIT_FAILURE);
-  } 
+  }
+  
   if(t->qtdAlunos == 0) {
     fprintf(arquivo, "Nenhum aluno cadastrado\n");
-    exit(EXIT_FAILURE);
   } else {
     fprintf(arquivo, "Alunos cadastrados: \n");
     for(int i = 0; i < t->qtdAlunos; i++) {
@@ -162,7 +161,8 @@ void ListarTodos(turma *t) {
     }
   }
   fclose(arquivo);
-} //função que ferifica se o aluno está aprovado ou reprovado
+}
+//função que verifica aprovação do aluno
 int verifica_aprovacao(aluno *a) {
   for(int i = 0; i < 7; i++) {
     if(a->notas[i] < 7) {
@@ -170,7 +170,7 @@ int verifica_aprovacao(aluno *a) {
     }
   }
   return 1;
-} // lista apenas os alunos que obtem retorno 1 da função verifica_aprovacao
+} // lista apenas os alunos aprovados
 void ListarAprovados(turma *t) {
   int aprovados = 0;
   if(t->qtdAlunos == 0) {
@@ -210,7 +210,8 @@ void ListarAprovados(turma *t) {
     }
   }
   fclose(arquivo);
-} //lista apenas os alunos que obtem retorno 0 da função verifica_aprovacao
+} 
+//lista os alunos reprovados
 void ListarReprovados(turma *t){
   int reprovados = 0;
   if(t->qtdAlunos == 0) {
@@ -252,8 +253,8 @@ void ListarReprovados(turma *t){
         }
       }
       fclose(arquivo);
-    }//usa a matricula para encontrar o aluno e mostrar suas informações
-
+    }
+//usa a matricula para buscar o aluno
 void Procurar(turma *t){
   int matricula;
   int encontrado = 0;
@@ -310,7 +311,7 @@ void Procurar(turma *t){
       fclose(arquivo);
     }
 
-//exibe o numero de alunos cadastrados
+// mostra todos os alunos
 void quant_alunos(turma *t) {
   int quantidade = 0;
   quantidade = t->qtdAlunos;
